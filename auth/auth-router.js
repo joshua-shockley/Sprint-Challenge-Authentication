@@ -4,6 +4,8 @@ const jwt = require('jsonwebtoken');
 const secret = require('../api/secret/secret.js');
 const Users = require('./Auth-Model.js');
 
+const generateToken = require('../database/makeToken.js');
+
 router.post('/register', (req, res) => {
     // implement registration
     const user = req.body; //setting up what to send to add
@@ -13,6 +15,8 @@ router.post('/register', (req, res) => {
 
     Users.add(user)
         .then(newUser => {
+            req.session.userId = newUser.id;
+
             res.status(200).json({ newUser });
         })
         .catch(error => {
@@ -22,28 +26,24 @@ router.post('/register', (req, res) => {
 
 router.post('/login', (req, res) => {
     const { username, password } = req.body;
-    console.log(req.body, username, password);
     Users.findBy({ username })
         .first()
         .then(user => {
-            console.log(user, 'in .then');
             if (user && bcrypt.compareSync(password, user.password)) {
 
-                // res.json({ message: 'made it past bcrypt' });
-                console.log('hello from before generate token');
-                req.session.userId = user.id;
-                // const token = makeToken(user);
-                res.status(200).json({
-                    message: `welcome ${user.username}`
-                        // token,
-                        // userid: user.id,
-                        // username: user.username,
-                });
+                const token = generateToken(user);
+                // req.session.userId = user.id;
 
+                res.status(200).json({
+                    message: `welcome ${user.username}`,
+                    token,
+                    username: user.username,
+                    userId: user.id,
+                });
             } else {
                 console.log('now in the else')
-                res.status(401).json({ message: ' Credentials dont match' })
-            };
+                res.status(401).json({ message: ' Credentials dont match' });
+            }
         })
         .catch(error => {
             console.log('now its in the catch')
@@ -51,17 +51,21 @@ router.post('/login', (req, res) => {
         });
 });
 
-// function makeToken(user) {
-//     console.log('in gen token');
+
+//currently importing the token fn from its own file and its working
+// function generateToken(user) {
 //     const payload = {
 //         subject: user.id,
 //         username: user.username,
+//         //any other data
 //     };
-//     options = {
-//         exipresIn: '1d',
+//     const secrets = 'thisisa freaking secretof secrets!'; //currently importing in the secret from above otherwise it would b just secrets in the return.
+//     const options = {
+//         expiresIn: '1h',
 //     };
-//     // console.log(payload, options, secret.jwtSecret);
-//     return jwt.sign(payload, secret.jwtSecret, options); //make a secret in another file and import
+
+//     return jwt.sign(payload, secret.jwtSecret, options);
 // }
+
 
 module.exports = router;

@@ -18,7 +18,7 @@ function add(user) {
 };
 
 function findBy(filter) {
-    console.log(filter, 'from auth-model');
+    // console.log(filter, 'from auth-model');
     return db('users')
         .where(filter)
         .first();

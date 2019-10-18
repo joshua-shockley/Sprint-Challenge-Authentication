@@ -15,7 +15,7 @@ const sessionConfig = {
     name: 'turtle',
     secret: 'this is the secret',
     cookie: {
-        maxAge: 1000 * 60 * 60,
+        maxAge: 1000 * 60 * 120,
         secure: false,
         httpOnly: true,
     },
@@ -24,7 +24,7 @@ const sessionConfig = {
     store: new knexSessionStore({
         knex: knexConfig,
         createtable: true,
-        clearInterval: 1000 * 60 * 30,
+        clearInterval: 1000 * 60 * 60 * 20,
     })
 };
 
